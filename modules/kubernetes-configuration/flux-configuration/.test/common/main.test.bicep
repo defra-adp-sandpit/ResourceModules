@@ -21,7 +21,7 @@ param serviceShort string = 'kcfccom'
 param enableDefaultTelemetry bool = true
 
 @description('Optional. A token to inject into the name of each resource.')
-param namePrefix string = '[[namePrefix]]'
+param namePrefix string = 'fluxaa'
 
 // ============ //
 // Dependencies //
@@ -75,6 +75,12 @@ module testDeployment '../../main.bicep' = {
         prune: true
         syncIntervalInSeconds: 300
         timeoutInSeconds: 300
+        postBuild: {
+          substitute: {
+            TEST_VAR1: 'foo'
+            TEST_VAR2: 'bar'
+          }
+        }
       }
     }
   }

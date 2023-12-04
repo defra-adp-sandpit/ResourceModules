@@ -351,14 +351,8 @@ param identityProfile object = {}
 @description('Optional. The customer managed key definition.')
 param customerManagedKey customerManagedKeyType
 
-@description('Optional. Whether the metrics profile for the Azure Monitor managed service for Prometheus addon is enabled.')
-param enableAzureMonitorProfileMetrics bool = false
-
-@description('Optional. A comma-separated list of additional Kubernetes label keys.')
-param metricLabelsAllowlist string = ''
-
-@description('Optional. A comma-separated list of Kubernetes annotation keys.')
-param metricAnnotationsAllowList string = ''
+@description('Optional. Prometheus addon profile for the container service cluster.')
+param azureMonitorProfile azureMonitorProfileType
 
 resource cMKKeyVault 'Microsoft.KeyVault/vaults@2023-02-01' existing = if (!empty(customerManagedKey.?keyVaultResourceId)) {
   name: last(split((customerManagedKey.?keyVaultResourceId ?? 'dummyVault'), '/'))
@@ -553,15 +547,12 @@ resource managedCluster 'Microsoft.ContainerService/managedClusters@2023-07-02-p
       enablePrivateClusterPublicFQDN: enablePrivateClusterPublicFQDN
       privateDNSZone: privateDNSZone
     }
-    azureMonitorProfile: {
-      metrics: enableAzureMonitorProfileMetrics ? {
+    azureMonitorProfile: !empty(azureMonitorProfile) ? {
+      metrics: {
         enabled: true
-        kubeStateMetrics: {
-          metricAnnotationsAllowList: metricAnnotationsAllowList
-          metricLabelsAllowlist: metricLabelsAllowlist
-        }
-      } : null
-    }
+        kubeStateMetrics: azureMonitorProfile.metrics.kubeStateMetrics
+      }
+    } : null
     podIdentityProfile: {
       allowNetworkPluginKubenet: podIdentityProfileAllowNetworkPluginKubenet
       enabled: podIdentityProfileEnable
@@ -856,3 +847,20 @@ type customerManagedKeyType = {
   @description('Required. Network access of key vault. The possible values are Public and Private. Public means the key vault allows public access from all networks. Private means the key vault disables public access and enables private link. The default value is Public.')
   keyVaultNetworkAccess: ('Private' | 'Public')
 }?
+
+type azureMonitorProfileType = {
+
+  @description('Optional. Metrics profile for the prometheus service addon.')
+  metrics: {
+
+    @description('Optional. Kube State Metrics for prometheus addon profile for the container service cluster.')
+    kubeStateMetrics: {
+
+      @description('Optional. Comma-separated list of additional Kubernetes label keys that will be used in the resource\'s labels metric.')
+      metricAnnotationsAllowList: string
+
+      @description('Optional. Comma-separated list of Kubernetes annotations keys that will be used in the resource\'s labels metric.')
+      metricLabelsAllowlist: string
+    }
+  }
+}

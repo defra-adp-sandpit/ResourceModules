@@ -863,4 +863,4 @@ type azureMonitorProfileType = {
       metricLabelsAllowlist: string
     }
   }
-}?
+}

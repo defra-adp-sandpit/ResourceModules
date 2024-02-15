@@ -289,6 +289,9 @@ param enableWorkloadIdentity bool = false
 @description('Optional. Whether to enable Azure Defender.')
 param enableAzureDefender bool = false
 
+@description('Optional. A list of up to 10 base64 encoded CAs that will be added to the trust store on nodes with the Custom CA Trust feature enabled.')
+param customCATrustCertificates array = []
+
 @description('Optional. Whether to enable Kubernetes pod security policy. Requires enabling the pod security policy feature flag on the subscription.')
 param enablePodSecurityPolicy bool = false
 
@@ -584,6 +587,7 @@ resource managedCluster 'Microsoft.ContainerService/managedClusters@2023-07-02-p
       workloadIdentity: enableWorkloadIdentity ? {
         enabled: enableWorkloadIdentity
       } : null
+      customCATrustCertificates: customCATrustCertificates
     }
     storageProfile: {
       blobCSIDriver: {
@@ -612,6 +616,7 @@ module managedCluster_agentPools 'agent-pool/main.bicep' = [for (agentPool, inde
     count: contains(agentPool, 'count') ? agentPool.count : 1
     sourceResourceId: contains(agentPool, 'sourceResourceId') ? agentPool.sourceResourceId : ''
     enableAutoScaling: contains(agentPool, 'enableAutoScaling') ? agentPool.enableAutoScaling : false
+    enableCustomCATrust: contains(agentPool, 'enableCustomCATrust') ? agentPool.enableCustomCATrust : false
     enableEncryptionAtHost: contains(agentPool, 'enableEncryptionAtHost') ? agentPool.enableEncryptionAtHost : false
     enableFIPS: contains(agentPool, 'enableFIPS') ? agentPool.enableFIPS : false
     enableNodePublicIP: contains(agentPool, 'enableNodePublicIP') ? agentPool.enableNodePublicIP : false

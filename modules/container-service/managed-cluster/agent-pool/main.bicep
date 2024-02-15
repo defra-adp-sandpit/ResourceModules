@@ -22,6 +22,9 @@ param sourceResourceId string = ''
 @description('Optional. Whether to enable auto-scaler.')
 param enableAutoScaling bool = false
 
+@description('Optional. When set to true, AKS adds a label to the node indicating that the feature is enabled and deploys a daemonset along with host services to sync custom certificate authorities from user-provided list of base64 encoded certificates into node trust stores. Defaults to false.')
+param enableCustomCATrust bool = false
+
 @description('Optional. This is only supported on certain VM sizes and in certain Azure regions. For more information, see: /azure/aks/enable-host-encryption. For security reasons, this setting should be enabled.')
 param enableEncryptionAtHost bool = false
 
@@ -185,6 +188,7 @@ resource agentPool 'Microsoft.ContainerService/managedClusters/agentPools@2023-0
     count: count
     creationData: !empty(sourceResourceId) ? creationData : null
     enableAutoScaling: enableAutoScaling
+    enableCustomCATrust: enableCustomCATrust
     enableEncryptionAtHost: enableEncryptionAtHost
     enableFIPS: enableFIPS
     enableNodePublicIP: enableNodePublicIP
